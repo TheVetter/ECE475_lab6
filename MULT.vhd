@@ -35,9 +35,20 @@ begin
 
 end;
 
-entity HA is
+entity NXOR is 
 	generic()
 	port()
+end;
+
+architecture behav of NXOR is
+begin
+
+end;
+
+entity HA is
+	generic(width : positive := 4);
+	port(A, B: in std_logic;
+		S, Co: out std_logic);
 end;
 architecture behav of HA is
 begin
@@ -47,18 +58,19 @@ end;
 entity FA is
 	generic(width : positive := 5);
 	port(A, B, Cin: in std_logic;
-		Sum, Carry: out std_logic_vector(width-1 downto 0)); --not sure what length supposed to be
+		Sum, Co: out std_logic); 
 end;
 architecture behav of FA is
 	signal x1 : std_logic;
 	signal x2 : std_logic;
 	signal n1 : std_logic;
 	signal n2 : std_logic;
-	signal n3 : std_logic;
 begin
-	x1 <= 
-	x2 <=
-	n1 <= NAND2(A,B)
+	x1 <= NXOR(A, B);
+	Sum <= NXOR(x1, Ci);
+	n1 <= NAND2(A, B);
+	n2 <= NAND2(x1, Cin);
+	Co <= NAND2(n1, n2);
 end;
 
 entity RCA is 
