@@ -15,7 +15,7 @@ entity MULT is
 end MULT;
 
 architecture struct of MULT is 
-
+begin
 
 end struct; 
 
