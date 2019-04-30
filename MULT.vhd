@@ -15,34 +15,24 @@ entity MULT is
 end MULT;
 
 entity AND2 is
-	generic(width : positive := 2);
-	port(A: in std_logic_vector(width-1 downto 0);
-		Z: out std_logic);
+	generic(width : positive := 3);
+	port(A, B: in std_logic;
+			Z: out std_logic);
 end;
 architecture behav of AND2 is
 begin
-	p1: process(A)
-	variable temp: std_logic := '1';
-	begin
-		for i in A'length-1 downto 0 loop
-			temp := temp and A(i);
-		end loop;
-		Z <= temp;
-	end process;
+	Z <= A and B;
 end architecture;
 
 entity NAND2 is	
-	generic(width: positive := 2);
-	port(A : in std_logic_vector(width-1 downto 0)
+	generic(width: positive := 3);
+	port(A, B : in std_logic;
 		Z: out std_logic);
 end;
-
 architecture behav of NAND2 is
 begin
-	p1: process(A)
-	begin
-		Z <= not(AND2(A));
-	end process;
+	Z <= not(AND2(A, B));
+
 end;
 
 entity HA is
@@ -55,12 +45,20 @@ begin
 end;
 
 entity FA is
-	generic()
-	port()
+	generic(width : positive := 5);
+	port(A, B, Cin: in std_logic;
+		Sum, Carry: out std_logic_vector(width-1 downto 0)); --not sure what length supposed to be
 end;
 architecture behav of FA is
+	signal x1 : std_logic;
+	signal x2 : std_logic;
+	signal n1 : std_logic;
+	signal n2 : std_logic;
+	signal n3 : std_logic;
 begin
-
+	x1 <= 
+	x2 <=
+	n1 <= NAND2(A,B)
 end;
 
 entity RCA is 
