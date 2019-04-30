@@ -25,3 +25,10 @@
 - Don't be a jerk. 
 - Share your changes. We are share our changes with you. 
 
+
+
+## TODO 
+
+- [ ] Make Testbench
+- [ ] fill in architeture
+
