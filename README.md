@@ -16,7 +16,7 @@
 ### Testing
 
 1. In the library view double click `work` -> `testbench`. This will start a simulation 
-2. Execute macro: `Tools' -> `tcl` -> `execute macro`
+2. Execute macro: `Tools` -> `tcl` -> `execute macro`
 3. select `.do` file that you want to run. 
 
 
