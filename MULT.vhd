@@ -76,18 +76,25 @@ begin
 end;
 
 entity RCA is 
-	generic(width : postive := 5);
-	port()
+	generic(length : postive := 4);
+	port(X, Y : in std_logic_vector(length - 1 downto 0);
+		Cin: in std_logic;
+		S: out std_logic_vector(width downto 0));
 end;
-
 architecture behav of RCA is
+	signal c: std_logic_vector(length downto 0);
 begin
-
+	c(0) <= Cin;
+	RCA_gen: for i in 0 to length - 1 generate
+		FA_comp: FA
+			port map (X(i), Y(i), c(i), S(i), c(i + 1));
+	end generate;
+	S(length)
 end;
 	
 architecture struct of MULT is 
 
 begin
-
+	
 end struct; 
 
