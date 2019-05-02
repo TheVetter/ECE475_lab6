@@ -5,54 +5,14 @@
 Library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity MULT is 
-    -- resource: https://surf-vhdl.com/vhdl-syntax-web-course-surf-vhdl/vhdl-generics/
-    generic ( X_Len, Y_Len: integer := 4 );
-    port (x : in std_logic_vector(X_Len downto 0);
-          Y : in std_logic_vector(Y_Len Downto 0);
-          P : out std_logic_vector( X_Len + Y_Len downto 0));
-
-end MULT;
-
-entity AND2 is
-	generic(width : positive := 3);
-	port(A, B: in std_logic;
-			Z: out std_logic);
-end;
-architecture behav of AND2 is
-begin
-	Z <= A and B;
-end architecture;
-
-entity NAND2 is	
-	generic(width: positive := 3);
-	port(A, B : in std_logic;
-		Z: out std_logic);
-end;
-architecture behav of NAND2 is
-begin
-	Z <= not(AND2(A, B));
-
-end;
-
-entity XOR2 is 
-	generic(width: positive := 3);
-	port(A, B: in std_logic;
-		Z: out std_logic);
-end;
-architecture behav of XOR2 is
-begin
-	Z <= A xor B;
-end;
-
 entity HA is
 	generic(width : positive := 4);
 	port(A, B: in std_logic;
-		S, Co: out std_logic);
+		Sum, Co: out std_logic);
 end;
 architecture behav of HA is
-	S <= XOR2(A, B);
-	Co <= AND2(B, A);
+	Sum <= A xor B;
+	Co <= B and A;
 begin
 
 end;
@@ -68,11 +28,11 @@ architecture behav of FA is
 	signal n1 : std_logic;
 	signal n2 : std_logic;
 begin
-	x1 <= XOR2(A, B);
-	Sum <= XOR2(x1, Ci);
-	n1 <= NAND2(A, B);
-	n2 <= NAND2(x1, Cin);
-	Co <= NAND2(n1, n2);
+	x1 <= A xor B;
+	Sum <= x1 xor Ci;
+	n1 <= not(A and B);
+	n2 <= not(x1 and Cin);
+	Co <= not(n1 and n2);
 end;
 
 entity RCA is 
@@ -91,9 +51,24 @@ begin
 	end generate;
 	S(length)
 end;
+
+entity MULT is 
+    -- resource: https://surf-vhdl.com/vhdl-syntax-web-course-surf-vhdl/vhdl-generics/
+    generic ( X_Len, Y_Len: integer := 4 );
+    port (x : in std_logic_vector(X_Len downto 0);
+          Y : in std_logic_vector(Y_Len Downto 0);
+          P : out std_logic_vector( X_Len + Y_Len downto 0));
+
+end MULT;
 	
 architecture struct of MULT is 
-
+	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+	signal intermediate: PP;		--Y rows, X columns
+	for i in 0 to Y_Len loop
+		for j in 0 to X_Len loop
+			intermediate(i , j) <= Y(i) and X(i);
+		end loop;
+	end loop;
 begin
 	
 end struct; 
