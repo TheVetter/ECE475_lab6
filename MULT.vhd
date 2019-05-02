@@ -63,13 +63,29 @@ end MULT;
 	
 architecture struct of MULT is 
 	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
-	signal intermediate: PP;		--Y rows, X columns
+		signal intermediate: PP := (others(others => '0'));		--Y rows, X columns
+	type HA_array is array() of std_logic;
+	type FA_array is array() of std_logic;
+begin
+	--makes 2d array of partial products
 	for i in 0 to Y_Len loop
 		for j in 0 to X_Len loop
 			intermediate(i , j) <= Y(i) and X(i);
 		end loop;
 	end loop;
-begin
+	
+	--generate Half Adders: #X bits - 1
+	HA_generate: for i in 0 to X_Len - 2 generate
+		HA_comp: HA
+			port map(A(), B(), Sum(), Co());
+	end generate;
+	
+	FA_generate: for 
+		FA_comp: FA
+			port map(A(), B(), Cin(), Sum(), Co());
+	end generate;
+	
+	
 	
 end struct; 
 
