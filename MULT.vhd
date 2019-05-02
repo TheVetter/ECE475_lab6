@@ -6,19 +6,16 @@ Library IEEE;
 use IEEE.std_logic_1164.all;
 
 entity HA is
-	generic(width : positive := 4);
 	port(A, B: in std_logic;
 		Sum, Co: out std_logic);
 end;
 architecture behav of HA is
+begin
 	Sum <= A xor B;
 	Co <= B and A;
-begin
-
 end;
 
 entity FA is
-	generic(width : positive := 5);
 	port(A, B, Cin: in std_logic;
 		Sum, Co: out std_logic); 
 end;
@@ -36,7 +33,6 @@ begin
 end;
 
 entity RCA is 
-	generic(length : postive := 4);
 	port(X, Y : in std_logic_vector(length - 1 downto 0);
 		Cin: in std_logic;
 		S: out std_logic_vector(width downto 0));
@@ -62,10 +58,30 @@ entity MULT is
 end MULT;
 	
 architecture struct of MULT is 
+	component HA
+	port(A, B: in std_logic;
+		Sum, Co: out std_logic);
+	end component;
+	
+	component FA
+	port(A, B, Cin: in std_logic;
+		Sum, Co: out std_logic); 
+	end component;
+	
+	component RCA 
+	port(X, Y : in std_logic_vector(length - 1 downto 0);
+		Cin: in std_logic;
+		S: out std_logic_vector(width downto 0));intermediate
+	end component;
+	
+	--initializing arrays
 	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
-		signal intermediate: PP := (others(others => '0'));		--Y rows, X columns
-	type HA_array is array() of std_logic;
-	type FA_array is array() of std_logic;
+		signal : PP := (others(others => '0'));		--Y rows, X columns
+	type Sum_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+		signal inter_sum: Sum_array := (others(others => '0'));
+	type Carry_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+		signal inter_carry: Carry_array:= (others(others => '0'));
+
 begin
 	--makes 2d array of partial products
 	for i in 0 to Y_Len loop
@@ -74,16 +90,20 @@ begin
 		end loop;
 	end loop;
 	
-	--generate Half Adders: #X bits - 1
-	HA_generate: for i in 0 to X_Len - 2 generate
-		HA_comp: HA
-			port map(A(), B(), Sum(), Co());
-	end generate;
-	
-	FA_generate: for 
-		FA_comp: FA
-			port map(A(), B(), Cin(), Sum(), Co());
-	end generate;
+	--generate Full Adders and Half Adders
+	GEN_adders: for i in 0 to Y_Len - 1 generate
+		GEN_adders2: for 0 to X_Len - 1 generate
+			HA_generate: if i = 0 generate
+				U0: HA
+					port map(A(), B(), Sum(), Co());
+			end generate HA_generate;
+			
+			FA_generate: if i > 0 generate
+				UX: FA
+					port map(A(), B(), Cin(), Sum(), Co());
+			end generate FA_generate;
+		end generate GEN_adders2;
+	end generate GEN_adders;
 	
 	
 	
