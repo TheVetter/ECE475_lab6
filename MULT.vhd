@@ -87,15 +87,28 @@ entity RCA is
 		Cin: in std_logic;
 		S: out std_logic_vector(4 downto 0));  --left bound was width, I changed it to length bc what is width? X and Y are the same length currently anyway
 end;
+
 architecture behav of RCA is
+ 	component HA
+	port(A, B: in std_logic;
+		Sum, Co: out std_logic);
+	end component;
+	
+	component FA
+	port(A, B, Cin: in std_logic;
+		Sum, Co: out std_logic); 
+	end component;
+  
 	signal c: std_logic_vector(4 downto 0);   --left bound was length, hardcoded to 4
 begin
 	c(0) <= Cin;
 	RCA_gen: for i in 0 to 3 generate --was 0 to length-1, changed to 3
-		FA_comp: FA
-			port map (X(i), Y(i), c(i), S(i), c(i + 1));
+		FA_comp: 
+		FA port map (X(i), Y(i), c(i), S(i), c(i + 1));
 	end generate;
 	S(4) <= c(4); --both were indexed to length, changed to 4
+	
+	--still needs HA?
 end;
 ------- end RCA Adder ---------
 
