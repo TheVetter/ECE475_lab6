@@ -81,7 +81,7 @@ use IEEE.std_logic_1164.all;
 ----------- RCA Adder ---------
 -- arbitrarily sized RCA
 -- only works if X and Y are same length
--- "length" is the number of FA's (0 downto length-1)
+-- "length" is the number of FA's (0 to length-1)
 entity RCA is 
 	port(X, Y : in std_logic_vector(3 downto 0); --left bound should be "length-1", so hardcoded for a length of 4, it's a 3
 		Cin: in std_logic;
@@ -102,13 +102,13 @@ architecture behav of RCA is
 	signal c: std_logic_vector(4 downto 0);   --left bound was length, hardcoded to 4
 begin
 	c(0) <= Cin;
-	RCA_gen: for i in 0 to 3 generate --was 0 to length-1, changed to 3
+	RCA_gen: for i in 0 to 3 generate  --was 0 to length-1, changed to 3
 		FA_comp: 
 		FA port map (X(i), Y(i), c(i), S(i), c(i + 1));
 	end generate;
 	S(4) <= c(4); --both were indexed to length, changed to 4
 	
-	--still needs HA?
+	--TODO: still needs HA?
 end;
 ------- end RCA Adder ---------
 
@@ -124,6 +124,21 @@ entity MULT is
 end MULT;
 	
 architecture struct of MULT is 
+	component myAND 
+		port(A, B: in std_logic;
+			ANDout: out std_logic);
+	end component;
+	
+	component myXOR 
+	port(A, B: in std_logic;
+		XORout: out std_logic);
+	end component;
+
+	component myNOT
+	port(A: in std_logic;
+			NOTout: out std_logic);
+	end component;
+
 	component HA
 	port(A, B: in std_logic;
 		Sum, Co: out std_logic);
@@ -135,31 +150,31 @@ architecture struct of MULT is
 	end component;
 	
 	component RCA 
-	port(X, Y : in std_logic_vector(length - 1 downto 0);
+	port(X, Y : in std_logic_vector(3 downto 0);  --left bound changed from "length-1" to 3
 		Cin: in std_logic;
-		S: out std_logic_vector(width downto 0)); --intermediate
+		S: out std_logic_vector(4 downto 0)); --intermediate --left bound changed from "width" to length (which is 4) 
 	end component;
 	
 	--initializing arrays
 	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
-		signal PP := (others(others => '0'));		--Y rows, X columns
+		signal inter_product : PP; --:= (others(others => '0'));		--Y rows, X columns
 	type Sum_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
-		signal inter_sum: Sum_array := (others(others => '0'));
+		signal inter_sum: Sum_array; --:= (others(others => '0')); 
 	type Carry_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
-		signal inter_carry: Carry_array:= (others(others => '0'));
+		signal inter_carry: Carry_array; --:= (others(others => '0'));
 
 begin
 	--makes 2d array of partial products
-	for i in 0 to Y_Len loop
+	for i in 0 to Y_Len loop   --TODO: can generics(Y_len) be used like this?
 		for j in 0 to X_Len loop
-			intermediate(i , j) <= Y(i) and X(i);
+			inter_product(i , j) <= Y(i) and X(i);
 		end loop;
 	end loop;
 	
 	--generate Full Adders and Half Adders
 	GEN_adders: for i in 0 to Y_Len - 1 generate
 		GEN_adders2: for 0 to X_Len - 1 generate
-			HA_generate: if i = 0 generate				-- P00 goes straight to S0 tho? 
+			HA_generate: if i = 0 generate				-- PP00 goes straight to S0 tho? 
 				U0: HA
 					port map(A(), B(), Sum(), Co());	-- what goes in the ()?
 			end generate HA_generate;
