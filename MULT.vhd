@@ -91,6 +91,28 @@ end;
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
+----------- hockeystick ---------
+entity hockeystick is
+	port(A: in Sum_array;
+		result: out std_logic_vector(X_Len+Y_Len-1 downto 0); 
+end;
+architecture behav of hockeystick is
+	signal temp : std_logic_vector(X_Len+Y_Len-1 downto 0;
+begin
+	for w in 0 to temp'length-1 loop
+		for i in 0 to Y_Len-1 loop	--column 0
+			temp(w) <= inter_sum(i,0)-- & temp; -- (Y row, X col)
+		end loop; 
+		for j in 1 to X_Len-1 loop
+			temp(w) <= inter_sum(Y_Len-1,j)-- & temp;
+		end loop; 
+			temp(w) <= inter_carry(Y_Len-1, X_Len-1)-- & temp;
+	end loop;
+end;
+------- end hockeystick (Result grabber) ---------
+
+Library IEEE;
+use IEEE.std_logic_1164.all;
 ----------- RCA Adder ---------
 -- arbitrarily sized RCA
 -- only works if X and Y are same length
@@ -166,16 +188,22 @@ architecture struct of MULT is
 	port(A, B, Cin: in std_logic;
 		Sum, Co: out std_logic); 
 	end component;
+	
+	component hockeystick is
+		port(A: in Sum_array;
+			result: out std_logic_vector(X_Len+Y_Len-1 downto 0); 
+	end;
 
 	
 	--initializing arrays
 	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
-		signal inter_product : PP; --:= (others(others => '0'));		--Y rows, X columns
+		signal inter_product : PP; 									--Y rows, X columns
 	type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
-		signal inter_sum: Sum_array; --:= (others(others => '0')); 
+		signal inter_sum: Sum_array;   
 	type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
-		signal inter_carry: Carry_array; --:= (others(others => '0'));
-	
+		signal inter_carry: Carry_array; 
+		
+	signal result std_logic_vector(X_Len+Y_Len-1 downto 0); 
 		
 begin
 		
@@ -222,11 +250,7 @@ begin
 	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 	
 	--get the result
-	--column 0
-	for i in 0 to Y_Len-1 loop
-		temp <= inter_sum(i,0) & temp; -- (Y row, X col)
-	end loop; 
-	for j in 1 to X_Len-1 loop
-		temp <= inter_sum(,
+	hspuck : hockeystick port map(inter_sum, result); 
+
 	
 	end struct; 
