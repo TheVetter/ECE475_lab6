@@ -17,6 +17,19 @@ end;
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
+----------- NAND ---------
+entity myNAND is
+	port(A, B: in std_logic;
+		NANDout: out std_logic);
+end;
+architecture behav of myNAND is
+begin
+	NANDout <= A nand B;
+end;
+------- end NAND ---------
+
+Library IEEE;
+use IEEE.std_logic_1164.all;
 ----------- XOR ---------
 entity myXOR is
 	port(A, B: in std_logic;
@@ -129,6 +142,11 @@ architecture struct of MULT is
 			ANDout: out std_logic);
 	end component;
 	
+	component myNAND
+		port(A, B: in std_logic;
+			NANDout: out std_logic);
+	end component;
+	
 	component myXOR 
 	port(A, B: in std_logic;
 		XORout: out std_logic);
@@ -149,11 +167,11 @@ architecture struct of MULT is
 		Sum, Co: out std_logic); 
 	end component;
 	
-	component RCA 
-	port(X, Y : in std_logic_vector(3 downto 0);  --left bound changed from "length-1" to 3
-		Cin: in std_logic;
-		S: out std_logic_vector(4 downto 0)); --intermediate --left bound changed from "width" to length (which is 4) 
-	end component;
+	--component RCA 
+	--port(X, Y : in std_logic_vector(3 downto 0);  --left bound changed from "length-1" to 3
+	--	Cin: in std_logic;
+	--	S: out std_logic_vector(4 downto 0)); --intermediate --left bound changed from "width" to length (which is 4) 
+	--end component;
 	
 	--initializing arrays
 	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
@@ -162,10 +180,21 @@ architecture struct of MULT is
 		signal inter_sum: Sum_array; --:= (others(others => '0')); 
 	type Carry_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
 		signal inter_carry: Carry_array; --:= (others(others => '0'));
-
+		
 begin
+		
 	--makes 2d array of partial products
-	for i in 0 to Y_Len loop   --TODO: can generics(Y_len) be used like this?
+	gen1: for i in Y_Len-1 to 0 generate
+		gen2: for j in X_Len-1 to 0 generate
+			component: myAND port map(Y(i),X(j),inter_product(i,j));
+		end generate;
+	end generate;
+	
+	
+		
+		
+		
+	for  in 0 to Y_Len loop   --TODO: can generics(Y_len) be used like this?
 		for j in 0 to X_Len loop
 			inter_product(i , j) <= Y(i) and X(i);
 		end loop;
