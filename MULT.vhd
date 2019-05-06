@@ -166,7 +166,7 @@ architecture struct of MULT is
 	port(A, B, Cin: in std_logic;
 		Sum, Co: out std_logic); 
 	end component;
-	
+
 	
 	--initializing arrays
 	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
@@ -196,17 +196,17 @@ begin
 	
 	--Half adder for loop
 	hagen1: for j in 1 to X_Len-1 generate
-		pineapple: HA port map(inter_product(0, j), inter_product(1, j-1), inter_sum(1, j), inter_carry(1, j+1));
+		pineapple: HA port map(inter_product(0, j), inter_product(1, j-1), inter_sum(1, j), inter_carry(1, j));
 	end generate;
-	
+
 	--Middle rows for loop
 		--inside FA loop
 	mgen1: for i in 2 to Y_Len-1 generate
 		mgen2: for j in 0 to X_Len-2 generate
-			mango: FA port map(inter_product(i, j), inter_sum(i-1, j+1), Carry_array(i-1,j+1), inter_sum(i,j), inter_carry(i,j+1)) ; 
+			mango: FA port map(inter_product(i, j), inter_sum(i-1, j+1), inter_carry(i-1,j+1), inter_sum(i,j), inter_carry(i,j+1)) ;
 		end generate;
 		
-		apple: FA port map(inter_product(i, X_Len-2), inter_product(i-1, X_Len-1), Carry_array(i-1, X_Len-1), inter_sum(i, X_Len-1), inter_carry(i, X_Len-1)) ;
+		apple: FA port map(inter_product(i, X_Len-2), inter_product(i-1, X_Len-1), inter_carry(i-1, X_Len-1), inter_sum(i, X_Len-1), inter_carry(i, X_Len-1)) ;
 	end generate;
 	
 
@@ -214,11 +214,12 @@ begin
 		-- lonely full adder (half adder whose carry-in is always 1)
 	durian: FA port map (inter_sum(y_len-1, 1), inter_carry(Y_Len-1, 1), '1' , inter_sum(Y_Len, 0), inter_carry(Y_Len, 0));
 		--inside FA loop
-	finalgen: for j in 1 to X_Len-2 generate
+	finalgen: for i in 1 to X_Len-2 generate
 		grape: FA port map (inter_sum(y_len-1, i), inter_carry(Y_Len-1, i),inter_carry(Y_Len, i), inter_sum(Y_Len, i), inter_carry(Y_Len, i+1));
 	end generate;
+
 	-- lonely full adder (whose carry-out is special (bottom left most FA))
-	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len));
+	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 	
 	--get the result
 	--column 0
@@ -227,9 +228,5 @@ begin
 	end loop; 
 	for j in 1 to X_Len-1 loop
 		temp <= inter_sum(,
-	
-	
-	
-	
 	
 	end struct; 
