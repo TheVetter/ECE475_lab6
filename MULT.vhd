@@ -167,19 +167,15 @@ architecture struct of MULT is
 		Sum, Co: out std_logic); 
 	end component;
 	
-	--component RCA 
-	--port(X, Y : in std_logic_vector(3 downto 0);  --left bound changed from "length-1" to 3
-	--	Cin: in std_logic;
-	--	S: out std_logic_vector(4 downto 0)); --intermediate --left bound changed from "width" to length (which is 4) 
-	--end component;
 	
 	--initializing arrays
 	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
 		signal inter_product : PP; --:= (others(others => '0'));		--Y rows, X columns
-	type Sum_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+	type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
 		signal inter_sum: Sum_array; --:= (others(others => '0')); 
-	type Carry_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+	type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
 		signal inter_carry: Carry_array; --:= (others(others => '0'));
+	
 		
 begin
 		
@@ -188,11 +184,11 @@ begin
 		ppgen2: for j in X_Len-1 downto 0 generate
 		
 			PP_AND: if (i /= Y_Len-1 xor j /= X_Len-1) generate
-				component: myAND port map(Y(i),X(j),inter_product(i,j));
+				bob: myAND port map(Y(i),X(j),inter_product(i,j));
 			end generate;
 			
 			PP_NAND: if not(i /= Y_Len-1 xor j /= X_Len-1) generate
-				component: myNAND port map(Y(i),X(j),inter_product(i,j));
+				banana: myNAND port map(Y(i),X(j),inter_product(i,j));
 			end generate;
 			
 		end generate;
@@ -200,20 +196,30 @@ begin
 	
 	--Half adder for loop
 	hagen1: for j in 1 to X_Len-1 generate
-		component: HA port map(inter_product(0, j), inter_product(1, j), inter_sum(i, j));
+		pineapple: HA port map(inter_product(0, j), inter_product(1, j-1), inter_sum(1, j), inter_carry(1, j+1));
 	end generate;
 	
 	--Middle rows for loop
 		--inside FA loop
-	mgen1: for i in 1 to Y_Len-1 generate
-		mgen2: for j in 1 to X_Len-1 generate
-			component: FA port map(inter_product(i, j), inter_sum(i+1), Carry_array());
+	mgen1: for i in 2 to Y_Len-1 generate
+		mgen2: for j in 0 to X_Len-2 generate
+			mango: FA port map(inter_product(i, j), inter_sum(i-1, j+1), Carry_array(i-1,j+1), inter_sum(i,j), inter_carry(i,j+1)) ; 
 		end generate;
-		--lonelly fullllllll adderruihskljghjs
+		
+		apple: FA port map(inter_product(i, X_Len-2), inter_product(i-1, X_Len-1), Carry_array(i-1, X_Len-1), inter_sum(i, X_Len-1), inter_carry(i, X_Len-1)) ;
 	end generate;
+	
+	
+	-- lonney fulll adddddddeer
+	durian: FA port map (inter_sum(y_len-1, 1), inter_carry(Y_Len-1, 1), '1' , inter_sum(Y_Len, 0), inter_carry(Y_Len, 0));
 	
 	--last row for loop
 		--inside FA loop
+	finalgen: for j in 1 to X_Len-2 generate
+		grape: FA port map (inter_sum(y_len-1, i), inter_carry(Y_Len-1, i),inter_carry(Y_Len, i), inter_sum(Y_Len, i), inter_carry(Y_Len, i+1));
+	end generate;
+	
+	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len));
 	
 	
-end struct; 
+	end struct; 
