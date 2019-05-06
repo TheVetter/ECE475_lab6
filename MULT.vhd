@@ -183,9 +183,9 @@ architecture struct of MULT is
 		
 begin
 		
-	--makes 2d array of partial products
-	gen1: for i in Y_Len-1 to 0 generate
-		gen2: for j in X_Len-1 to 0 generate
+	--generate 2d array of partial products
+	ppgen1: for i in Y_Len-1 downto 0 generate
+		ppgen2: for j in X_Len-1 downto 0 generate
 		
 			PP_AND: if (i /= Y_Len-1 xor j /= X_Len-1) generate
 				component: myAND port map(Y(i),X(j),inter_product(i,j));
@@ -198,30 +198,22 @@ begin
 		end generate;
 	end generate;
 	
+	--Half adder for loop
+	hagen1: for j in 1 to X_Len-1 generate
+		component: HA port map(inter_product(0, j), inter_product(1, j), inter_sum(i, j));
+	end generate;
 	
-		
-		
-		
-	for  in 0 to Y_Len loop   --TODO: can generics(Y_len) be used like this?
-		for j in 0 to X_Len loop
-			inter_product(i , j) <= Y(i) and X(i);
-		end loop;
-	end loop;
+	--Middle rows for loop
+		--inside FA loop
+	mgen1: for i in 1 to Y_Len-1 generate
+		mgen2: for j in 1 to X_Len-1 generate
+			component: FA port map(inter_product(i, j), inter_sum(i+1), Carry_array());
+		end generate;
+		--lonelly fullllllll adderruihskljghjs
+	end generate;
 	
-	--generate Full Adders and Half Adders
-	GEN_adders: for i in 0 to Y_Len - 1 generate
-		GEN_adders2: for 0 to X_Len - 1 generate
-			HA_generate: if i = 0 generate				-- PP00 goes straight to S0 tho? 
-				U0: HA
-					port map(A(), B(), Sum(), Co());	-- what goes in the ()?
-			end generate HA_generate;
-			
-			FA_generate: if i > 0 generate
-				UX: FA
-					port map(A(), B(), Cin(), Sum(), Co());
-			end generate FA_generate;
-		end generate GEN_adders2;
-	end generate GEN_adders;
+	--last row for loop
+		--inside FA loop
 	
 	
 end struct; 
