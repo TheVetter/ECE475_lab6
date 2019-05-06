@@ -209,17 +209,24 @@ begin
 		apple: FA port map(inter_product(i, X_Len-2), inter_product(i-1, X_Len-1), inter_carry(i-1, X_Len-1), inter_sum(i, X_Len-1), inter_carry(i, X_Len-1)) ;
 	end generate;
 	
-	
-	-- lonney fulll adddddddeer
-	durian: FA port map (inter_sum(y_len-1, 1), inter_carry(Y_Len-1, 1), '1' , inter_sum(Y_Len, 0), inter_carry(Y_Len, 0));
-	
+
 	--last row for loop
+		-- lonely full adder (half adder whose carry-in is always 1)
+	durian: FA port map (inter_sum(y_len-1, 1), inter_carry(Y_Len-1, 1), '1' , inter_sum(Y_Len, 0), inter_carry(Y_Len, 0));
 		--inside FA loop
 	finalgen: for i in 1 to X_Len-2 generate
 		grape: FA port map (inter_sum(y_len-1, i), inter_carry(Y_Len-1, i),inter_carry(Y_Len, i), inter_sum(Y_Len, i), inter_carry(Y_Len, i+1));
 	end generate;
-	
-	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 
+	-- lonely full adder (whose carry-out is special (bottom left most FA))
+	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
+	
+	--get the result
+	--column 0
+	for i in 0 to Y_Len-1 loop
+		temp <= inter_sum(i,0) & temp; -- (Y row, X col)
+	end loop; 
+	for j in 1 to X_Len-1 loop
+		temp <= inter_sum(,
 	
 	end struct; 
