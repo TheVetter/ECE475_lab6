@@ -186,7 +186,15 @@ begin
 	--makes 2d array of partial products
 	gen1: for i in Y_Len-1 to 0 generate
 		gen2: for j in X_Len-1 to 0 generate
-			component: myAND port map(Y(i),X(j),inter_product(i,j));
+		
+			PP_AND: if (i /= Y_Len-1 xor j /= X_Len-1) generate
+				component: myAND port map(Y(i),X(j),inter_product(i,j));
+			end generate;
+			
+			PP_NAND: if not(i /= Y_Len-1 xor j /= X_Len-1) generate
+				component: myNAND port map(Y(i),X(j),inter_product(i,j));
+			end generate;
+			
 		end generate;
 	end generate;
 	
