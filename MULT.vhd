@@ -214,8 +214,8 @@ architecture struct of MULT is
 	end component;
 	
 	component hockeystick is
-		port(A: in arrayType;
-			result: out std_logic_vector(X_Len+Y_Len-1 downto 0)); 
+		port(A, B: in arrayType;
+			result: out std_logic_vector(X_Len+Y_Len-1 downto 0));
 	end component;
 
 	
@@ -226,9 +226,9 @@ architecture struct of MULT is
 		signal inter_sum: Sum_array;   
 	type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
 		signal inter_carry: Carry_array; 
-		
-	signal result std_logic_vector(X_Len+Y_Len-1 downto 0); 
-	signal carryo std_logic;
+
+	signal result : std_logic_vector(X_Len+Y_Len-1 downto 0);
+	signal carryo : std_logic;
 		
 begin
 		
@@ -275,20 +275,21 @@ begin
 	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 	
 	--get the result
-	hspuck : hockeystick port map(inter_sum, inter_carry, result); 
-	
+	hspuck : hockeystick generic map (X_Len, Y_Len)
+				port map(arrayType(inter_sum),  arrayType(inter_carry), result);
+
 	addOnes: for i in Y_Len to result'length generate
-		if (i = Y_Len) generate
-			snapple : HA port map (result(i), '1', carryo, result(i)); 
+		papple: if (i = Y_Len) generate
+			snapple : HA port map (result(i), '1', carryo, result(i));
 		end generate;
-		if (i /= Y_Len and i /= X_Len+Y_Len) generate
+		chris: if (i /= Y_Len and i /= X_Len+Y_Len) generate
 			theBestStuffOnEarth: HA port map (result(i), carryo, carryo, result(i));
 		end generate;
-		if (i = X_Len+Y_Len) generate
+		sidney: if (i = X_Len+Y_Len) generate
 			lastGuy: FA port map (result(i), '1', carryo, carryo, result(i));
 		end generate;
 	end generate;
 
-	return result;
-	
+	P <= result;
+
 	end struct; 
