@@ -4,17 +4,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 package arrayTypes is
-	--generic ( X_Len, Y_Len: integer := 4 );							--do we want to leave this set to 4?
-	
-	-- type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
 	type arrayType is array(natural range <>, natural range <>) of std_logic;
-		-- signal inter_product : PP; 									--Y rows, X columns
-	-- type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
-		-- signal inter_sum: Sum_array;   
-	-- type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
-		-- signal inter_carry: Carry_array; 
 end package arrayTypes; 
 
+------------ end package -----------
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
@@ -111,9 +104,6 @@ use work.arrayTypes.all;
 entity hockeystick is
 	generic ( X_Len, Y_Len: integer := 4 ); --do we want to leave this set to 4?
 	
-	-- type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
-		-- signal inter_sum: Sum_array;   
-
 	port(A, B: in arrayType;
 		result: out std_logic_vector(X_Len+Y_Len-1 downto 0));
 end hockeystick;
@@ -123,12 +113,13 @@ begin
 	colonprocess : process
 	begin
 		for i in 0 to Y_Len-1 loop	--column 0
-			temp(i) <= A(i,0);-- & temp; -- (Y row, X col)
+			temp(i) <= A(i,0);  -- (Y row, X col)
 		end loop; 
 		for j in 1 to X_Len-1 loop
-			temp(j+(Y_Len-1)) <= A(Y_Len-1,j);-- & temp;
+			temp(j+(Y_Len-1)) <= A(Y_Len-1,j);
 		end loop; 
-		temp(X_Len+Y_Len-1) <= B(Y_Len-1, X_Len-1);-- & temp;
+		temp(X_Len+Y_Len-1) <= B(Y_Len-1, X_Len-1);
+		result <= temp;
 	end process; 
 end;
 ------- end hockeystick (Result grabber) ---------
@@ -224,8 +215,8 @@ architecture struct of MULT is
 		signal inter_product : PP; 									--Y rows, X columns
 	type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
 		signal inter_sum: Sum_array;   
-	type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
-		signal inter_carry: Carry_array; 
+	--type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
+		signal inter_carry: arrayType; 
 
 	signal result : std_logic_vector(X_Len+Y_Len-1 downto 0);
 	signal carryo : std_logic;
@@ -236,11 +227,11 @@ begin
 	ppgen1: for i in Y_Len-1 downto 0 generate
 		ppgen2: for j in X_Len-1 downto 0 generate
 		
-			PP_AND: if (i /= Y_Len-1 xor j /= X_Len-1) generate
+			PP_AND: if not(i /= Y_Len-1 xor j /= X_Len-1) generate
 				bob: myAND port map(Y(i),X(j),inter_product(i,j));
 			end generate;
 			
-			PP_NAND: if not(i /= Y_Len-1 xor j /= X_Len-1) generate
+			PP_NAND: if (i /= Y_Len-1 xor j /= X_Len-1) generate
 				banana: myNAND port map(Y(i),X(j),inter_product(i,j));
 			end generate;
 			
@@ -275,8 +266,8 @@ begin
 	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 	
 	--get the result
-	hspuck : hockeystick generic map (X_Len, Y_Len)
-				port map(arrayType(inter_sum),  arrayType(inter_carry), result);
+	hspuck : hockeystick --generic map(X_Len, Y_Len)
+				port map(arrayType(inter_sum), arrayType(inter_carry), result);
 
 	addOnes: for i in Y_Len to result'length generate
 		papple: if (i = Y_Len) generate
@@ -292,4 +283,4 @@ begin
 
 	P <= result;
 
-	end struct; 
+	end struct;
