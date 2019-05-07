@@ -1,13 +1,7 @@
 -- <Name> 
 -- <Student ID> 
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.all;
-package arrayTypes is
-	type arrayType is array(natural range <>, natural range <>) of std_logic;
-end package arrayTypes; 
------- end package ------
-
+-- TODO: Do all of lab
 Library IEEE;
 use IEEE.std_logic_1164.all;
 ----------- AND ---------
@@ -58,7 +52,7 @@ architecture behav of myNOT is
 begin
     NOTout <= not A;
 end;
-------- end NOT ---------
+----------- end NOT ------------
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
@@ -97,11 +91,21 @@ end;
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
-library work; 
-use work.arrayTypes.all;
------------ hockeystick ---------
-entity hockeystick is
-	generic ( X_Len, Y_Len: integer := 4 ); --do we want to leave this set to 4?
+----------- RCA Adder ---------
+-- arbitrarily sized RCA
+-- only works if X and Y are same length
+-- "length" is the number of FA's (0 to length-1)
+entity RCA is 
+	port(X, Y : in std_logic_vector(3 downto 0); --left bound should be "length-1", so hardcoded for a length of 4, it's a 3
+		Cin: in std_logic;
+		S: out std_logic_vector(4 downto 0));  --left bound was width, I changed it to length bc what is width? X and Y are the same length currently anyway
+end;
+
+architecture behav of RCA is
+ 	component HA
+	port(A, B: in std_logic;
+		Sum, Co: out std_logic);
+	end component;
 	
 	port(A, B: in arrayType;
 		result: out std_logic_vector(X_Len+Y_Len downto 0));
@@ -121,13 +125,25 @@ begin
 		wait for 10 ns;
 	end process;
 	result <= temp;
+	component FA
+	port(A, B, Cin: in std_logic;
+		Sum, Co: out std_logic); 
+	end component;
+  
+	signal c: std_logic_vector(4 downto 0);   --left bound was length, hardcoded to 4
+begin
+	c(0) <= Cin;
+	RCA_gen: for i in 0 to 3 generate  --was 0 to length-1, changed to 3
+		FA_comp: 
+		FA port map (X(i), Y(i), c(i), S(i), c(i + 1));
+	end generate;
+	S(4) <= c(4); --both were indexed to length, changed to 4
+	
 end;
-------- end hockeystick (Result grabber) ---------
+------- end RCA Adder ---------
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
-library work; 
-use work.arrayTypes.all;
 entity MULT is 
     -- resource: https://surf-vhdl.com/vhdl-syntax-web-course-surf-vhdl/vhdl-generics/
     generic ( X_Len, Y_Len: integer := 4 );							--do we want to leave this set to 4?
@@ -172,6 +188,11 @@ architecture struct of MULT is
 		port(A, B: in arrayType;
 			result: out std_logic_vector(X_Len+Y_Len-1 downto 0));
 	end component;
+	--component RCA 
+	--port(X, Y : in std_logic_vector(3 downto 0);  --left bound changed from "length-1" to 3
+	--	Cin: in std_logic;
+	--	S: out std_logic_vector(4 downto 0)); --intermediate --left bound changed from "width" to length (which is 4) 
+	--end component;
 	
 	constant xTop : integer := X'length -1;
 	constant yTop : integer := Y'length -1;
@@ -189,6 +210,12 @@ architecture struct of MULT is
 
 	signal result : std_logic_vector(X_Len+Y_Len-1 downto 0) := (others => '0');
 	signal carryo : std_logic;
+	type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+		signal inter_product : PP; --:= (others(others => '0'));		--Y rows, X columns
+	type Sum_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+		signal inter_sum: Sum_array; --:= (others(others => '0')); 
+	type Carry_array is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+		signal inter_carry: Carry_array; --:= (others(others => '0'));
 		
 begin
  			
@@ -202,6 +229,12 @@ begin
 			
 			PP_NAND: if (i /= yTop xor j /= xTop) generate
 				banana: myNAND port map(Y(i),X(j),inter_product(i,j));
+			PP_AND: if (i /= Y_Len-1 xor j /= X_Len-1) generate
+				component: myAND port map(Y(i),X(j),inter_product(i,j));
+			end generate;
+			
+			PP_NAND: if not(i /= Y_Len-1 xor j /= X_Len-1) generate
+				component: myNAND port map(Y(i),X(j),inter_product(i,j));
 			end generate;
 			
 		end generate;
@@ -212,8 +245,10 @@ begin
 	--Half adder for loop
 	hagen1: for j in 1 to xTop generate
 		pineapple: HA port map(inter_product(0, j), inter_product(1, j-1), inter_sum(1, j-1), inter_carry(1, j));
+	hagen1: for j in 1 to X_Len-1 generate
+		component: HA port map(inter_product(0, j), inter_product(1, j), inter_sum(i, j));
 	end generate;
-
+	
 	--Middle rows for loop
 		--inside FA loop
 	mgen1: for i in 2 to yTop generate
@@ -222,9 +257,13 @@ begin
 		end generate;
 		
 		apple: FA port map(inter_product(i, xTop-1), inter_product(i-1, xTop), inter_carry(i-1, xTop), inter_sum(i, xTop-1), inter_carry(i, xTop)) ;
+	mgen1: for i in 1 to Y_Len-1 generate
+		mgen2: for j in 1 to X_Len-1 generate
+			component: FA port map(inter_product(i, j), inter_sum(i+1), Carry_array());
+		end generate;
+		--lonelly fullllllll adderruihskljghjs
 	end generate;
-
-
+	
 	--last row for loop
 		-- lonely full adder (half adder whose carry-in is always 1)
 	durian: FA port map (inter_sum(yTop, 0), inter_carry(yTop, 1), '1', inter_sum(Y_Len, 0), inter_carry(Y_Len, 1));
