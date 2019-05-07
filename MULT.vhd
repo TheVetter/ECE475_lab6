@@ -107,7 +107,7 @@ entity hockeystick is
 		result: out std_logic_vector(X_Len+Y_Len downto 0));
 end hockeystick;
 architecture behav of hockeystick is
-	signal temp : std_logic_vector(X_Len+Y_Len downto 0);
+	signal temp : std_logic_vector(X_Len+Y_Len downto 0) := (others => '0');
 begin
 	colonprocess : process
 	begin
@@ -118,6 +118,7 @@ begin
 			temp(j+(Y_Len-1)) <= A(Y_Len-1,j);
 		end loop; 
 		temp(X_Len+Y_Len-1) <= B(Y_Len-1, X_Len-1);
+		wait for 10 ns;
 	end process;
 	result <= temp;
 end;
@@ -179,9 +180,12 @@ architecture struct of MULT is
 	type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
 		signal inter_sum: Sum_array;   
 	type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
-		signal inter_carry: Carry_array; 
+		signal inter_carry: Carry_array;
 
-	signal result : std_logic_vector(X_Len+Y_Len downto 0);
+	signal tempInterArray : arrayType(Y_Len downto 0, X_Len downto 0);
+	signal tempCarryArray : arrayType(Y_Len downto 0, X_Len - 1 downto 0);
+
+	signal result : std_logic_vector(X_Len+Y_Len downto 0) := (others => '0');
 	signal carryo : std_logic;
 		
 begin
@@ -228,22 +232,25 @@ begin
 	-- lonely full adder (whose carry-out is special (bottom left most FA))
 	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 	
+	
+	tempInterArray <= arrayType(inter_sum);
+	tempCarryArray <= arrayType(inter_carry);
 	--get the result
 	hspuck : hockeystick --generic map(X_Len, Y_Len)
-				port map((inter_sum), (inter_carry), result);
+				port map(tempInterArray, tempCarryArray, result);
 
-	addOnes: for i in Y_Len to result'high generate
-		papple: if (i = Y_Len) generate
-			snapple : HA port map (result(i), '1', carryo, result(i));
-		end generate;
-		chris: if (i /= Y_Len and i /= X_Len+Y_Len) generate
-			theBestStuffOnEarth: HA port map (result(i), carryo, carryo, result(i));
-		end generate;
-		sidney: if (i = result'high) generate
-			lastGuy: FA port map (result(i), '1', carryo, carryo, result(i));
-		end generate;
-	end generate;
+	-- addOnes: for i in Y_Len to X_Len+Y_Len generate
+		-- papple: if (i = Y_Len) generate
+			-- snapple : HA port map (result(i), '1', carryo, result(i));
+		-- end generate;
+		-- chris: if (i /= Y_Len and i /= X_Len+Y_Len) generate
+			-- theBestStuffOnEarth: HA port map (result(i), carryo, carryo, result(i));
+		-- end generate;
+		-- sidney: if (i = X_Len+Y_Len) generate
+			-- lastGuy: FA port map (result(i), '1', carryo, carryo, result(i));
+		-- end generate;
+	-- end generate;
 
-	P <= result;
+	P <= inter_sum(4,4) & inter_sum(4,3) & inter_sum(4,2) & inter_sum(4,1) & inter_sum(4,0) & inter_sum(3,0) &inter_sum(2,0) &inter_sum(1,0) & inter_sum(0,0);
 
 	end struct;
