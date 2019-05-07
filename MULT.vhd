@@ -1,7 +1,21 @@
 -- <Name> 
 -- <Student ID> 
 
--- TODO: Do all of lab
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+package arrayTypes is
+	--generic ( X_Len, Y_Len: integer := 4 );							--do we want to leave this set to 4?
+	
+	-- type PP is array(Y_Len - 1 downto 0, X_Len - 1 downto 0) of std_logic;
+	type arrayType is array(natural range <>, natural range <>) of std_logic;
+		-- signal inter_product : PP; 									--Y rows, X columns
+	-- type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
+		-- signal inter_sum: Sum_array;   
+	-- type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
+		-- signal inter_carry: Carry_array; 
+end package arrayTypes; 
+
+
 Library IEEE;
 use IEEE.std_logic_1164.all;
 ----------- AND ---------
@@ -91,23 +105,31 @@ end;
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
+library work; 
+use work.arrayTypes.all;
 ----------- hockeystick ---------
 entity hockeystick is
-	port(A: in Sum_array;
-		result: out std_logic_vector(X_Len+Y_Len-1 downto 0); 
-end;
+	generic ( X_Len, Y_Len: integer := 4 ); --do we want to leave this set to 4?
+	
+	-- type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
+		-- signal inter_sum: Sum_array;   
+
+	port(A, B: in arrayType;
+		result: out std_logic_vector(X_Len+Y_Len-1 downto 0));
+end hockeystick;
 architecture behav of hockeystick is
-	signal temp : std_logic_vector(X_Len+Y_Len-1 downto 0;
+	signal temp : std_logic_vector(X_Len+Y_Len-1 downto 0);
 begin
-	for w in 0 to temp'length-1 loop
+	colonprocess : process
+	begin
 		for i in 0 to Y_Len-1 loop	--column 0
-			temp(w) <= inter_sum(i,0)-- & temp; -- (Y row, X col)
+			temp(i) <= A(i,0);-- & temp; -- (Y row, X col)
 		end loop; 
 		for j in 1 to X_Len-1 loop
-			temp(w) <= inter_sum(Y_Len-1,j)-- & temp;
+			temp(j+(Y_Len-1)) <= A(Y_Len-1,j);-- & temp;
 		end loop; 
-			temp(w) <= inter_carry(Y_Len-1, X_Len-1)-- & temp;
-	end loop;
+		temp(X_Len+Y_Len-1) <= B(Y_Len-1, X_Len-1);-- & temp;
+	end process; 
 end;
 ------- end hockeystick (Result grabber) ---------
 
@@ -149,6 +171,8 @@ end;
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
+library work; 
+use work.arrayTypes.all;
 entity MULT is 
     -- resource: https://surf-vhdl.com/vhdl-syntax-web-course-surf-vhdl/vhdl-generics/
     generic ( X_Len, Y_Len: integer := 4 );							--do we want to leave this set to 4?
@@ -190,9 +214,9 @@ architecture struct of MULT is
 	end component;
 	
 	component hockeystick is
-		port(A: in Sum_array;
-			result: out std_logic_vector(X_Len+Y_Len-1 downto 0); 
-	end;
+		port(A: in arrayType;
+			result: out std_logic_vector(X_Len+Y_Len-1 downto 0)); 
+	end component;
 
 	
 	--initializing arrays
@@ -204,6 +228,7 @@ architecture struct of MULT is
 		signal inter_carry: Carry_array; 
 		
 	signal result std_logic_vector(X_Len+Y_Len-1 downto 0); 
+	signal carryo std_logic;
 		
 begin
 		
@@ -250,7 +275,20 @@ begin
 	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 	
 	--get the result
-	hspuck : hockeystick port map(inter_sum, result); 
+	hspuck : hockeystick port map(inter_sum, inter_carry, result); 
+	
+	addOnes: for i in Y_Len to result'length generate
+		if (i = Y_Len) generate
+			snapple : HA port map (result(i), '1', carryo, result(i)); 
+		end generate;
+		if (i /= Y_Len and i /= X_Len+Y_Len) generate
+			theBestStuffOnEarth: HA port map (result(i), carryo, carryo, result(i));
+		end generate;
+		if (i = X_Len+Y_Len) generate
+			lastGuy: FA port map (result(i), '1', carryo, carryo, result(i));
+		end generate;
+	end generate;
 
+	return result;
 	
 	end struct; 
