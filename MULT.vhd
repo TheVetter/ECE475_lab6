@@ -125,7 +125,7 @@ begin
 	RCA_gen: for i in 0 to len-1 generate
 		FA_comp: FA port map (X(i), Y(i), c(i), S(i), c(i + 1));
 	end generate;
-	S(len-1) <= c(len-1); --both were indexed to length, changed to 4
+	--S(len-1) <= c(len-1); --both were indexed to length, changed to 4
 end;
 ------- end RCA Adder ---------
 
@@ -238,7 +238,7 @@ begin
 		-- NOT ANYMORE lonely full adder (half adder whose carry-in is always 1)
 	durian: FA port map (inter_sum(yTop, 0), inter_carry(yTop, 1), '0', inter_sum(Y_Len, 0), inter_carry(Y_Len, 1));
 		--inside FA loop
-	finalgen: for i in 1 to xTop-1 generate
+	finalgen: for i in 1 to xTop-2 generate
 		grape: FA port map (inter_sum(yTop, i), inter_carry(yTop, i+1),inter_carry(Y_Len, i), inter_sum(Y_Len, i), inter_carry(Y_Len, i+1));
 	end generate;
 
@@ -246,36 +246,33 @@ begin
 	cherry: FA port map (inter_product(yTop, xTop), inter_carry(yTop, xTop), inter_carry(Y_Len, xTop-1) , inter_sum(Y_Len, xTop-1), inter_sum(Y_Len, xTop)); --the last term is the carry out which gets put into the sum array
 	
 	
-	--get result
-	     
-	--------------------------------------
+	-- tempInterSum <= arrayType(inter_sum);
+	-- tempInterCarry <= arrayType(inter_carry);
 	
-	tempInterSum <= arrayType(inter_sum);
-	tempInterCarry <= arrayType(inter_carry);
 	--get the result
-	
-zack: for i in 0 to Y_Len generate	--column 0
-			tempresult(i) <= tempInterSum(i,0);  -- (Y row, X col)
+	zack: for i in 0 to Y_Len generate	--column 0
+			tempresult(i) <= inter_sum(i,0);  -- (Y row, X col)
 		end generate; 
-jake: for j in 1 to xTop generate
-			tempresult(j+x_len) <= tempInterSum(Y_Len,j);
+	jake: for j in 1 to xTop generate
+			tempresult(j+y_len) <= inter_sum(Y_Len,j);
 		end generate; 
-
-addbits: if (xTop = yTop) generate
+		
+		
+	--make temp for adding 1's
+	addbits: if (xTop = yTop) generate
 			tempBits(Y_Len) <= '1';
 		end generate;
-addNotBits: if (xTop /= yTop) generate
+	addNotBits: if (xTop /= yTop) generate
 				tempBits(xTop) <= '1';
 				tempBits(yTop) <= '1';
 				tempBits(X_Len+Y_Len-1) <= '1';
 			end generate;
 	
-		
+	--add 1's
 	joe: RCA 
 			generic map (result'length) 
 			port map(tempresult, tempBits, '0', result); 
 
-	P <= result;--inter_sum(Y_Len,4)&inter_sum(Y_Len,3)&inter_sum(Y_Len,2)&inter_sum(Y_Len,1)&inter_sum(Y_Len,0)&inter_sum(yTop,0)&inter_sum(yTop-1,0)&inter_sum(yTop-2,0)&inter_sum(yTop-3,0)&inter_sum(yTop-4,0);
-
+	P <= result;
 	
 	end struct;
