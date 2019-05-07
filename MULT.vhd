@@ -115,10 +115,10 @@ entity hockeystick is
 		-- signal inter_sum: Sum_array;   
 
 	port(A, B: in arrayType;
-		result: out std_logic_vector(X_Len+Y_Len-1 downto 0));
+		result: out std_logic_vector(X_Len+Y_Len downto 0));
 end hockeystick;
 architecture behav of hockeystick is
-	signal temp : std_logic_vector(X_Len+Y_Len-1 downto 0);
+	signal temp : std_logic_vector(X_Len+Y_Len downto 0);
 begin
 	colonprocess : process
 	begin
@@ -129,7 +129,8 @@ begin
 			temp(j+(Y_Len-1)) <= A(Y_Len-1,j);-- & temp;
 		end loop; 
 		temp(X_Len+Y_Len-1) <= B(Y_Len-1, X_Len-1);-- & temp;
-	end process; 
+	end process;
+	
 end;
 ------- end hockeystick (Result grabber) ---------
 
@@ -227,7 +228,7 @@ architecture struct of MULT is
 	type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
 		signal inter_carry: Carry_array; 
 
-	signal result : std_logic_vector(X_Len+Y_Len-1 downto 0);
+	signal result : std_logic_vector(X_Len+Y_Len downto 0);
 	signal carryo : std_logic;
 		
 begin
@@ -278,14 +279,14 @@ begin
 	hspuck : hockeystick generic map (X_Len, Y_Len)
 				port map(arrayType(inter_sum),  arrayType(inter_carry), result);
 
-	addOnes: for i in Y_Len to result'length generate
+	addOnes: for i in Y_Len to result'high generate
 		papple: if (i = Y_Len) generate
 			snapple : HA port map (result(i), '1', carryo, result(i));
 		end generate;
 		chris: if (i /= Y_Len and i /= X_Len+Y_Len) generate
 			theBestStuffOnEarth: HA port map (result(i), carryo, carryo, result(i));
 		end generate;
-		sidney: if (i = X_Len+Y_Len) generate
+		sidney: if (i = result'high) generate
 			lastGuy: FA port map (result(i), '1', carryo, carryo, result(i));
 		end generate;
 	end generate;
