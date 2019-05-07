@@ -205,33 +205,34 @@ begin
 		end generate;
 	end generate;
 	
-	-- --Half adder for loop
-	-- hagen1: for j in 1 to X_Len-1 generate
-		-- pineapple: HA port map(inter_product(0, j), inter_product(1, j-1), inter_sum(1, j), inter_carry(1, j));
-	-- end generate;
+	--Half adder for loop
+	hagen1: for j in 1 to X_Len-1 generate
+		pineapple: HA port map(inter_product(0, j), inter_product(1, j-1), inter_sum(1, j), inter_carry(1, j));
+	end generate;
 
-	-- --Middle rows for loop
-		-- --inside FA loop
-	-- mgen1: for i in 2 to Y_Len-1 generate
-		-- mgen2: for j in 0 to X_Len-2 generate
-			-- mango: FA port map(inter_product(i, j), inter_sum(i-1, j+1), inter_carry(i-1,j+1), inter_sum(i,j), inter_carry(i,j+1)) ;
-		-- end generate;
+	--Middle rows for loop
+		--inside FA loop
+	mgen1: for i in 2 to Y_Len-1 generate
+		mgen2: for j in 0 to X_Len-2 generate
+			mango: FA port map(inter_product(i, j), inter_sum(i-1, j+1), inter_carry(i-1,j+1), inter_sum(i,j), inter_carry(i,j+1)) ;
+		end generate;
 		
-		-- apple: FA port map(inter_product(i, X_Len-2), inter_product(i-1, X_Len-1), inter_carry(i-1, X_Len-1), inter_sum(i, X_Len-1), inter_carry(i, X_Len-1)) ;
-	-- end generate;
+		apple: FA port map(inter_product(i, X_Len-2), inter_product(i-1, X_Len-1), inter_carry(i-1, X_Len-1), inter_sum(i, X_Len-1), inter_carry(i, X_Len-1)) ;
+	end generate;
 
 
-	-- --last row for loop
-		-- -- lonely full adder (half adder whose carry-in is always 1)
-	-- durian: FA port map (inter_sum(y_len-1, 1), inter_carry(Y_Len-1, 1), '1' , inter_sum(Y_Len, 0), inter_carry(Y_Len, 0));
-		-- --inside FA loop
-	-- finalgen: for i in 1 to X_Len-2 generate
-		-- grape: FA port map (inter_sum(y_len-1, i), inter_carry(Y_Len-1, i),inter_carry(Y_Len, i), inter_sum(Y_Len, i), inter_carry(Y_Len, i+1));
-	-- end generate;
+	--last row for loop
+		-- lonely full adder (half adder whose carry-in is always 1)
+	durian: FA port map (inter_sum(y_len-1, 1), inter_carry(Y_Len-1, 1), '1' , inter_sum(Y_Len, 0), inter_carry(Y_Len, 0));
+		--inside FA loop
+	finalgen: for i in 1 to X_Len-2 generate
+		grape: FA port map (inter_sum(y_len-1, i), inter_carry(Y_Len-1, i),inter_carry(Y_Len, i), inter_sum(Y_Len, i), inter_carry(Y_Len, i+1));
+	end generate;
 
-	-- -- lonely full adder (whose carry-out is special (bottom left most FA))
-	-- cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
+	-- lonely full adder (whose carry-out is special (bottom left most FA))
+	cherry: FA port map (inter_product(y_len-1, x_len-1), inter_carry(Y_Len-1, 1), inter_carry(Y_Len, x_len-1) , inter_sum(Y_Len, X_Len-1), inter_carry(Y_Len, x_len-1	));
 	
+	--------------------------------------
 	
 	-- tempInterArray <= arrayType(inter_sum);
 	-- tempCarryArray <= arrayType(inter_carry);
@@ -251,6 +252,6 @@ begin
 		-- end generate;
 	-- end generate;
 
-	P <= inter_product(4,3)&inter_product(4,2)&inter_product(4,1)&inter_product(4,0)&inter_product(3,3)&inter_product(2,3)&inter_product(1,3)&inter_product(0,3)&inter_product(3,2);
+	P <= inter_carry(4,3)&inter_carry(4,2)&inter_carry(4,1)&inter_carry(4,0)&"00000";--&inter_carry(0,4)&inter_carry(0,2)&inter_carry(0,1)&inter_carry(0,0)&inter_carry(3,1);
 
 	end struct;
