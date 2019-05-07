@@ -6,8 +6,7 @@ use IEEE.STD_LOGIC_1164.all;
 package arrayTypes is
 	type arrayType is array(natural range <>, natural range <>) of std_logic;
 end package arrayTypes; 
-
------------- end package -----------
+------ end package ------
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
@@ -126,42 +125,6 @@ end;
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
------------ RCA Adder ---------
--- arbitrarily sized RCA
--- only works if X and Y are same length
--- "length" is the number of FA's (0 to length-1)
-entity RCA is 
-	port(X, Y : in std_logic_vector(3 downto 0); --left bound should be "length-1", so hardcoded for a length of 4, it's a 3
-		Cin: in std_logic;
-		S: out std_logic_vector(4 downto 0));  --left bound was width, I changed it to length bc what is width? X and Y are the same length currently anyway
-end;
-
-architecture behav of RCA is
- 	component HA
-	port(A, B: in std_logic;
-		Sum, Co: out std_logic);
-	end component;
-	
-	component FA
-	port(A, B, Cin: in std_logic;
-		Sum, Co: out std_logic); 
-	end component;
-  
-	signal c: std_logic_vector(4 downto 0);   --left bound was length, hardcoded to 4
-begin
-	c(0) <= Cin;
-	RCA_gen: for i in 0 to 3 generate  --was 0 to length-1, changed to 3
-		FA_comp: 
-		FA port map (X(i), Y(i), c(i), S(i), c(i + 1));
-	end generate;
-	S(4) <= c(4); --both were indexed to length, changed to 4
-	
-	--TODO: still needs HA?
-end;
-------- end RCA Adder ---------
-
-Library IEEE;
-use IEEE.std_logic_1164.all;
 library work; 
 use work.arrayTypes.all;
 entity MULT is 
@@ -215,8 +178,8 @@ architecture struct of MULT is
 		signal inter_product : PP; 									--Y rows, X columns
 	type Sum_array is array(Y_Len downto 0, X_Len downto 0) of std_logic;
 		signal inter_sum: Sum_array;   
-	--type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
-		signal inter_carry: arrayType; 
+	type Carry_array is array(Y_Len downto 0, X_Len - 1 downto 0) of std_logic;
+		signal inter_carry: Carry_array; 
 
 	signal result : std_logic_vector(X_Len+Y_Len-1 downto 0);
 	signal carryo : std_logic;
