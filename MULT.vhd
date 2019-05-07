@@ -117,15 +117,9 @@ begin
 		for j in 1 to X_Len-1 loop
 			temp(j+(Y_Len-1)) <= A(Y_Len-1,j);
 		end loop; 
-<<<<<<< HEAD
-		temp(X_Len+Y_Len-1) <= B(Y_Len-1, X_Len-1);-- & temp;
-	end process;
-	
-=======
 		temp(X_Len+Y_Len-1) <= B(Y_Len-1, X_Len-1);
-		result <= temp;
-	end process; 
->>>>>>> 5b03c616de545c496be2ade9c961bae46764007b
+	end process;
+	result <= temp;
 end;
 ------- end hockeystick (Result grabber) ---------
 
@@ -221,7 +215,7 @@ begin
 		
 		apple: FA port map(inter_product(i, X_Len-2), inter_product(i-1, X_Len-1), inter_carry(i-1, X_Len-1), inter_sum(i, X_Len-1), inter_carry(i, X_Len-1)) ;
 	end generate;
-	
+
 
 	--last row for loop
 		-- lonely full adder (half adder whose carry-in is always 1)
@@ -236,7 +230,7 @@ begin
 	
 	--get the result
 	hspuck : hockeystick --generic map(X_Len, Y_Len)
-				port map(arrayType(inter_sum), arrayType(inter_carry), result);
+				port map((inter_sum), (inter_carry), result);
 
 	addOnes: for i in Y_Len to result'high generate
 		papple: if (i = Y_Len) generate
