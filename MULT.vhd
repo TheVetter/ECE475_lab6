@@ -52,7 +52,7 @@ architecture behav of myNOT is
 begin
     NOTout <= not A;
 end;
-------- end NOT ---------
+----------- end NOT ------------
 
 Library IEEE;
 use IEEE.std_logic_1164.all;
@@ -121,7 +121,6 @@ begin
 	end generate;
 	S(4) <= c(4); --both were indexed to length, changed to 4
 	
-	--TODO: still needs HA?
 end;
 ------- end RCA Adder ---------
 
