@@ -22,8 +22,10 @@ architecture TESTBENCH of Mult_tb is
 
     signal X_thing: Std_logic_vector(4 downto 0); -- length of 5
     signal Y_thing: Std_logic_vector(4 downto 0); -- length of 4
+	signal z_thing: Std_logic_vector(5 downto 0); -- length of 5
     signal result1 : Std_logic_vector(X_thing'length+ Y_thing'length  -1 downto 0);
-    --signal result2 : Std_logic_vector(X_thing'high+ Y_thing'high downto 0);
+	
+    signal result2 : Std_logic_vector(Z_thing'length+ Y_thing'length -1 downto 0);
 begin
 
     U1: MULT
@@ -32,18 +34,19 @@ begin
                 Y_thing,
                 result1);
 
-    --U2: MULT
-     --   generic map ( 5 , 4 )
-    --    port map (  X_thing,
-    --                Y_thing,
-    --                result2);
+    U2: MULT
+       generic map ( z_thing'length  , y_thing'length)
+       port map (  z_thing,
+                   Y_thing,
+                   result2);
 
     DATA: process
         variable L: line;
         variable I, J: integer;
-        variable w : unsigned(X_thing'high downto 0):= (others => '0');
+        variable w : unsigned(x_thing'high downto 0):= (others => '0');
         variable v : unsigned(Y_thing'high downto 0):= (others => '0');
-
+        variable u : unsigned(z_thing'high downto 0):= (others => '0');
+        
     begin
         -- write header
         write(L, top_line);
@@ -59,10 +62,10 @@ begin
                 write(L, X_thing, left, 10);
                 write(L, Y_thing,       left, 10 );
                 WRITE(L, divider, left, 3);
-                write(L, Result1,    left, 8);
+                write(L, Result1,    left, 15);
                 writeline(output_manager,L);
                 v := v + "1";
-                wait for 25 ns;
+                wait for 10 ns;
             end loop;
             v:=(others => '0');
             w := w + "1";
@@ -71,22 +74,22 @@ begin
         write(L, middle_line);
         writeline(output_manager,L);
 
-    --    for I in 0 to 32 loop
-    --        for J in 0 to 15 loop
-    --            X_thing <= Std_logic_vector(w);
-    --            Y_thing <= Std_logic_vector(v);
+       for I in 0 to 32 loop
+           for J in 0 to 15 loop
+               Z_thing <= Std_logic_vector(u);
+               Y_thing <= Std_logic_vector(v);
 
-    --            write(L, X_thing,       left, 5);
-    --            write(L, Y_thing,       left, 5);
-    --            WRITE(L, divider, left, 3);
-    --            write(L, result2,    left, 8);
-    --            writeline(output_manager,L);
-    --            v := v + "1";
-    --            wait for 25 ns;
-    --        end loop;
-    --        v:=(others => '0');
-    --        w := w + "1";
-    --    end loop;
+               write(L, Z_thing,       left, 10);
+               write(L, Y_thing,       left, 10);
+               WRITE(L, divider, left, 5);
+               write(L, result2,    left, 10);
+               writeline(output_manager,L);
+               v := v + "1";
+               wait for 10 ns;
+           end loop;
+           v:=(others => '0');
+           u := u + "1";
+       end loop;
     end process;
 
 end TESTBENCH;
